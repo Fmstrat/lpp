@@ -43,14 +43,14 @@ async function getPosts() {
             FROM person
             WHERE actor_id LIKE $1
         )
-        -- UNION
-        -- SELECT post_id
-        -- FROM post_read
-        -- WHERE person_id IN (
-        --     SELECT id
-        --     FROM person
-        --     WHERE actor_id LIKE $1
-        -- )
+        UNION
+        SELECT post_id
+        FROM post_read
+        WHERE person_id IN (
+            SELECT id
+            FROM person
+            WHERE actor_id LIKE $1
+        )
     )
     AND id NOT IN (
         SELECT post_id
