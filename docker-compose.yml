@@ -1,0 +1,18 @@
+version: '2.1'
+
+services:
+
+  lpp:
+    image: nowsci/lpp
+    container_name: lpp
+    environment:
+      LOCAL_URL: https://lemmy.domain.ext
+      LOCAL_USERNAME: top_level_admin_user
+      LOCAL_PASSWORD: password
+      PURGE_OLDER_THAN_DAYS: 365
+      HOURS_BETWEEN_PURGES: 24
+      PG_HOST: lemmy_db_host
+      PG_PORT: 5432
+      PG_USERNAME: lemmy
+      PG_PASSWORD: lemmy_db_password
+    restart: unless-stopped
