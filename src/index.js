@@ -33,24 +33,76 @@ async function getPosts() {
     WHERE ap_id NOT LIKE $1
     AND published < NOW() - INTERVAL '${purgeOlderThanDays} days'
     AND id NOT IN (
-        SELECT post_id
-        FROM post_saved
-        UNION
-        SELECT post_id
-        FROM post_like
-        WHERE person_id IN (
-            SELECT id
-            FROM person
-            WHERE actor_id LIKE $1
-        )
-        UNION
-        SELECT post_id
-        FROM post_read
-        WHERE person_id IN (
-            SELECT id
-            FROM person
-            WHERE actor_id LIKE $1
-        )
+      SELECT post_id
+      FROM post_saved
+      UNION
+      SELECT post_id
+      FROM post_like
+      WHERE person_id IN (
+          SELECT id
+          FROM person
+          WHERE actor_id LIKE $1
+      )
+      UNION
+      SELECT post_id
+      FROM post_read
+      WHERE person_id IN (
+          SELECT id
+          FROM person
+          WHERE actor_id LIKE $1
+      )
+      UNION
+      SELECT post_id
+      FROM comment
+      WHERE creator_id IN (
+          SELECT id
+          FROM person
+          WHERE actor_id LIKE $1
+      )
+      UNION
+      SELECT post_id
+      FROM comment_like
+      WHERE person_id IN (
+          SELECT id
+          FROM person
+          WHERE actor_id LIKE $1
+      )
+      UNION
+      SELECT post_id
+      FROM comment
+      WHERE id IN (
+          SELECT comment_id
+          FROM comment_reply
+          WHERE recipient_id IN (
+              SELECT id
+              FROM person
+              WHERE actor_id LIKE $1
+          )
+      )
+      UNION
+      SELECT post_id
+      FROM comment
+      WHERE id IN (
+          SELECT comment_id
+          FROM comment_report
+          WHERE creator_id IN (
+              SELECT id
+              FROM person
+              WHERE actor_id LIKE $1
+          )
+      )
+      UNION
+      SELECT post_id
+      FROM comment
+      WHERE id IN (
+          SELECT comment_id
+          FROM comment_saved
+          WHERE person_id IN (
+              SELECT id
+              FROM person
+              WHERE actor_id LIKE $1
+          )
+      )
     )
     AND id NOT IN (
         SELECT post_id
@@ -72,6 +124,7 @@ async function main() {
     };
     let user = await localClient.login(loginForm);
     let posts = await getPosts();
+    console.log(`Purging ${posts.length} posts`)
     for await (const post of posts) {
       console.log(`Purging post ${post.id}`);
       await localClient.purgePost({
