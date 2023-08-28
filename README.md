@@ -20,6 +20,7 @@ services:
       HOURS_BETWEEN_PURGES: 24
       PG_HOST: lemmy_db_host
       PG_PORT: 5432
+      PG_DATABASE: lemmy
       PG_USERNAME: lemmy
       PG_PASSWORD: lemmy_db_password
     restart: unless-stopped
@@ -35,6 +36,7 @@ export PURGE_OLDER_THAN_DAYS=365
 export HOURS_BETWEEN_PURGES=24
 export PG_HOST=lemmy_db_host
 export PG_PORT=5432
+export PG_DATABASE=lemmy
 export PG_USERNAME=lemmy
 export PG_PASSWORD=lemmy_db_password
 npm install
@@ -52,5 +54,6 @@ npm start
 |HOURS_BETWEEN_PURGES|How long to wait between runs|
 |PG_HOST|Lemmy Postgres host|
 |PG_PORT|Lemmy Postgres port|
+|PG_DATABASE|Lemmy Postgres database name. Optional, and if not specified the username will be used as the database name|
 |PG_USERNAME|Lemmy Postgres user name|
 |PG_PASSWORD|Lemmy Postgres password|
