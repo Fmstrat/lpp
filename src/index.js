@@ -126,9 +126,10 @@ async function main() {
     };
     let user = await localClient.login(loginForm);
     let posts = await getPosts();
-    console.log(`Purging ${posts.length} posts`)
-    for await (const post of posts) {
-      console.log(`Purging post ${post.id}`);
+    let l = posts.length;
+    console.log(`Purging ${l} posts older than ${purgeOlderThanDays} days`);
+    for await (const [i, post] of posts.entries()) {
+      console.log(`Purging post ${post.id} (${i+1}/${l})`);
       await localClient.purgePost({
         post_id: post.id,
         reason: `LPP - Older than ${purgeOlderThanDays} days`,
