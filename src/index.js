@@ -8,6 +8,7 @@ const purgeOlderThanDays = parseInt(process.env.PURGE_OLDER_THAN_DAYS);
 const hoursBetweenPurges = parseInt(process.env.HOURS_BETWEEN_PURGES);
 
 const pgHost = process.env.PG_HOST;
+const pgDatabase = process.env.PG_DATABASE ?? process.env.PG_USERNAME;
 const pgPort = process.env.PG_PORT;
 const pgUsername = process.env.PG_USERNAME;
 const pgPassword = process.env.PG_PASSWORD;
@@ -15,6 +16,7 @@ const pgPassword = process.env.PG_PASSWORD;
 const pool = new Pool({
   host: pgHost,
   port: pgPort,
+  database: pgDatabase,
   user: pgUsername,
   password: pgPassword,
   max: 20,
@@ -124,9 +126,10 @@ async function main() {
     };
     let user = await localClient.login(loginForm);
     let posts = await getPosts();
-    console.log(`Purging ${posts.length} posts`)
-    for await (const post of posts) {
-      console.log(`Purging post ${post.id}`);
+    let l = posts.length;
+    console.log(`Purging ${l} posts older than ${purgeOlderThanDays} days`);
+    for await (const [i, post] of posts.entries()) {
+      console.log(`Purging post ${post.id} (${i+1}/${l})`);
       await localClient.purgePost({
         post_id: post.id,
         reason: `LPP - Older than ${purgeOlderThanDays} days`,
