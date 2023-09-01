@@ -5,11 +5,17 @@ services:
   lpp:
     image: nowsci/lpp
     container_name: lpp
+    volumes:
+      - /path/to/pictrs/mnt:/mnt
     environment:
       LOCAL_URL: https://lemmy.domain.ext
       LOCAL_USERNAME: top_level_admin_user
       LOCAL_PASSWORD: password
       PURGE_OLDER_THAN_DAYS: 365
+      PICTRS_RM_OLDER_THAN_DAYS: 365
+      PICTRS_SERVER_API_TOKEN: abcdefg
+      PICTRS_URL: http://lemmy-pictrs:8080
+      PICTRS_FOLDER: /mnt
       HOURS_BETWEEN_PURGES: 24
       PG_HOST: lemmy_db_host
       PG_PORT: 5432
