@@ -1,11 +1,16 @@
 const { LemmyHttp } = require("lemmy-js-client");
 const { Pool } = require('pg');
+const { purgePictrs } = require('./pictrs')
 
 const localUrl = process.env.LOCAL_URL;
 const localUsername = process.env.LOCAL_USERNAME;
 const localPassword = process.env.LOCAL_PASSWORD;
 const purgeOlderThanDays = parseInt(process.env.PURGE_OLDER_THAN_DAYS);
 const hoursBetweenPurges = parseInt(process.env.HOURS_BETWEEN_PURGES);
+
+const purgePictrsOlderThanDays = process.env.PICTRS_RM_OLDER_THAN_DAYS ? parseInt(process.env.PICTRS_RM_OLDER_THAN_DAYS) : null;
+const pictrsServerApiToken = process.env.PICTRS_SERVER_API_TOKEN ? process.env.PICTRS_SERVER_API_TOKEN : null;
+const pictrsUrl = process.env.PICTRS_URL ? process.env.PICTRS_URL : null;
 
 const pgHost = process.env.PG_HOST;
 const pgDatabase = process.env.PG_DATABASE ?? process.env.PG_USERNAME;
@@ -135,6 +140,10 @@ async function main() {
         reason: `LPP - Older than ${purgeOlderThanDays} days`,
         auth: user.jwt,
       });
+    }
+    if (purgePictrsOlderThanDays && pictrsServerApiToken && pictrsUrl) {
+      console.log(`Purging images older than ${purgePictrsOlderThanDays} days`);
+      await purgePictrs(pool);
     }
     console.log(`Sleeping ${hoursBetweenPurges} hours`);
     await sleep(hoursBetweenPurges * 60 * 60);
