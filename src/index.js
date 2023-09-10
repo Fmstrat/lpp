@@ -149,11 +149,11 @@ async function main() {
         auth: user.jwt,
       });
     }
-    if (purgePictrsOlderThanDays && pictrsServerApiToken && pictrsUrl) {
-      console.log(`Purging images older than ${purgePictrsOlderThanDays} days`);
-      await purgePictrs(pool);
-    }
     if (l < purgePageSize) {
+      if (purgePictrsOlderThanDays && pictrsServerApiToken && pictrsUrl) {
+        console.log(`Purging images older than ${purgePictrsOlderThanDays} days`);
+        await purgePictrs(pool);
+      }
       console.log(`Sleeping ${hoursBetweenPurges} hours`);
       await sleep(hoursBetweenPurges * 60 * 60);
     }
