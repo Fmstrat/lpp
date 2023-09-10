@@ -7,7 +7,7 @@ const localUsername = process.env.LOCAL_USERNAME;
 const localPassword = process.env.LOCAL_PASSWORD;
 const purgeOlderThanDays = parseInt(process.env.PURGE_OLDER_THAN_DAYS);
 const hoursBetweenPurges = parseInt(process.env.HOURS_BETWEEN_PURGES);
-const purgePageSize = parseInt(process.env.PURGE_PAGE_SIZE) || 100;
+const purgeBatchSize = parseInt(process.env.PURGE_BATCH_SIZE) || 100;
 
 const purgePictrsOlderThanDays = process.env.PICTRS_RM_OLDER_THAN_DAYS ? parseInt(process.env.PICTRS_RM_OLDER_THAN_DAYS) : null;
 const pictrsServerApiToken = process.env.PICTRS_SERVER_API_TOKEN ? process.env.PICTRS_SERVER_API_TOKEN : null;
@@ -117,7 +117,7 @@ async function getPosts() {
         FROM comment
         WHERE published >= NOW() - INTERVAL '${purgeOlderThanDays} days'
     )
-    LIMIT ${purgePageSize};
+    LIMIT ${purgeBatchSize};
   `, [
     `${localUrl}%`,
   ]);
@@ -143,7 +143,7 @@ async function main() {
         auth: user.jwt,
       });
     }
-    if (l < purgePageSize) {
+    if (l < purgeBatchSize) {
       if (purgePictrsOlderThanDays && pictrsServerApiToken && pictrsUrl) {
         console.log(`Purging images older than ${purgePictrsOlderThanDays} days`);
         await purgePictrs(pool);
