@@ -8,6 +8,7 @@ const localPassword = process.env.LOCAL_PASSWORD;
 const purgeOlderThanDays = parseInt(process.env.PURGE_OLDER_THAN_DAYS);
 const hoursBetweenPurges = parseInt(process.env.HOURS_BETWEEN_PURGES);
 const purgePageSize = parseInt(process.env.PURGE_PAGE_SIZE) || 100;
+const popularityExemption = parseInt(process.env.PURGE_POPULARITY_EXCEPTION) || 999999999;
 
 const purgePictrsOlderThanDays = process.env.PICTRS_RM_OLDER_THAN_DAYS ? parseInt(process.env.PICTRS_RM_OLDER_THAN_DAYS) : null;
 const pictrsServerApiToken = process.env.PICTRS_SERVER_API_TOKEN ? process.env.PICTRS_SERVER_API_TOKEN : null;
@@ -40,6 +41,11 @@ async function getPosts() {
     FROM post
     WHERE ap_id NOT LIKE $1
     AND published < NOW() - INTERVAL '${purgeOlderThanDays} days'
+    AND id NOT IN (
+      SELECT post_id
+      FROM post_aggregates
+      WHERE score >= ${popularityExemption}
+    )
     AND id NOT IN (
       SELECT post_id
       FROM post_saved
@@ -132,11 +138,12 @@ async function main() {
       password: localPassword,
     };
     let user = await localClient.login(loginForm);
+    console.log (`${popularityExemption}`)
     let posts = await getPosts();
     let l = posts.length;
     console.log(`Purging ${l} posts older than ${purgeOlderThanDays} days`);
     for await (const [i, post] of posts.entries()) {
-      console.log(`Purging post ${post.id} (${i+1}/${l})`);
+      console.log(`Purging post ${post.id} (${i+1}/${l}) score: `);
       await localClient.purgePost({
         post_id: post.id,
         reason: `LPP - Older than ${purgeOlderThanDays} days`,
