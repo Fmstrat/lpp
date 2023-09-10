@@ -7,6 +7,7 @@ const localUsername = process.env.LOCAL_USERNAME;
 const localPassword = process.env.LOCAL_PASSWORD;
 const purgeOlderThanDays = parseInt(process.env.PURGE_OLDER_THAN_DAYS);
 const hoursBetweenPurges = parseInt(process.env.HOURS_BETWEEN_PURGES);
+const purgePageSize = parseInt(process.env.PURGE_PAGE_SIZE) || 100;
 
 const purgePictrsOlderThanDays = process.env.PICTRS_RM_OLDER_THAN_DAYS ? parseInt(process.env.PICTRS_RM_OLDER_THAN_DAYS) : null;
 const pictrsServerApiToken = process.env.PICTRS_SERVER_API_TOKEN ? process.env.PICTRS_SERVER_API_TOKEN : null;
@@ -115,7 +116,8 @@ async function getPosts() {
         SELECT post_id
         FROM comment
         WHERE published >= NOW() - INTERVAL '${purgeOlderThanDays} days'
-    );
+    )
+    LIMIT ${purgePageSize};
   `, [
     `${localUrl}%`,
   ]);
@@ -141,12 +143,14 @@ async function main() {
         auth: user.jwt,
       });
     }
-    if (purgePictrsOlderThanDays && pictrsServerApiToken && pictrsUrl) {
-      console.log(`Purging images older than ${purgePictrsOlderThanDays} days`);
-      await purgePictrs(pool);
+    if (l < purgePageSize) {
+      if (purgePictrsOlderThanDays && pictrsServerApiToken && pictrsUrl) {
+        console.log(`Purging images older than ${purgePictrsOlderThanDays} days`);
+        await purgePictrs(pool);
+      }
+      console.log(`Sleeping ${hoursBetweenPurges} hours`);
+      await sleep(hoursBetweenPurges * 60 * 60);
     }
-    console.log(`Sleeping ${hoursBetweenPurges} hours`);
-    await sleep(hoursBetweenPurges * 60 * 60);
   }
 }
 
