@@ -138,7 +138,6 @@ async function main() {
       password: localPassword,
     };
     let user = await localClient.login(loginForm);
-    console.log (`${popularityExemption}`)
     let posts = await getPosts();
     let l = posts.length;
     console.log(`Purging ${l} posts older than ${purgeOlderThanDays} days`);
