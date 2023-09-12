@@ -206,7 +206,11 @@ async function purgePictrs(pool) {
         if (!identifiers.has(compare)) {
           const time = fs.statSync(f).mtime.getTime();
           if (time < yesterday) {
-            fs.unlinkSync(f);
+            try {
+              fs.unlinkSync(f);
+            } catch (e) {
+              console.error(e);
+            }
             rmCount++;
           } else {
             skipCount++;
