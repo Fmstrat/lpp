@@ -62,6 +62,7 @@ npm start
 |LOCAL_USERNAME|Username of a user for your instance|
 |LOCAL_PASSWORD|Password of a user for your instance|
 |PURGE_OLDER_THAN_DAYS|Posts must be older than this many days to be purged|
+|PURGE_BATCH_SIZE|Optional: Process this many posts at a time. Default: 100|
 |PICTRS_RM_OLDER_THAN_DAYS|Optional: Pictures older than this many days that failed to be purged by lemmy will be purged directly in Pict-rs|
 |PICTRS_SERVER_API_TOKEN|Optional: The server API key (PICTRS__SERVER__API_KEY) for Pict-rs|
 |PICTRS_URL|Optional: The URL for your Pict-rs instance|
