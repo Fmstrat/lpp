@@ -141,8 +141,8 @@ async function purgePictrs(pool) {
       }
       purgeCount++;
     } else {
+      const aliasUrl = `${pictrsUrl}/internal/aliases?alias=${alias}`
       try {
-        const aliasUrl = `${pictrsUrl}/internal/aliases?alias=${alias}`
         const aliasRes = await (await fetch(aliasUrl, {
           method: 'GET',
           headers: {
