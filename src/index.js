@@ -140,11 +140,13 @@ async function main() {
       for await (const [i, post] of posts.entries()) {
         console.log(`Purging post ${post.id} (${i + 1}/${l})`);
         try {
-          await localClient.purgePost({
-            post_id: post.id,
-            reason: `LPP - Older than ${purgeOlderThanDays} days`,
-            auth: user.jwt,
-          });
+          if (!process.env.DRY_RUN) {
+            await localClient.purgePost({
+              post_id: post.id,
+              reason: `LPP - Older than ${purgeOlderThanDays} days`,
+              auth: user.jwt,
+            });
+          }
         } catch (e) {
           console.error(e);
         }
