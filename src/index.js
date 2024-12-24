@@ -133,17 +133,20 @@ async function main() {
         password: localPassword,
       };
       let user = await localClient.login(loginForm);
+      localClient.setHeaders({Authorization: "Bearer " + user.jwt});
       let posts = await getPosts();
       let l = posts.length;
       console.log(`Purging ${l} posts older than ${purgeOlderThanDays} days`);
       for await (const [i, post] of posts.entries()) {
         console.log(`Purging post ${post.id} (${i + 1}/${l})`);
         try {
-          await localClient.purgePost({
-            post_id: post.id,
-            reason: `LPP - Older than ${purgeOlderThanDays} days`,
-            auth: user.jwt,
-          });
+          if (!process.env.DRY_RUN) {
+            await localClient.purgePost({
+              post_id: post.id,
+              reason: `LPP - Older than ${purgeOlderThanDays} days`,
+              auth: user.jwt,
+            });
+          }
         } catch (e) {
           console.error(e);
         }

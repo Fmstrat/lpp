@@ -129,20 +129,22 @@ async function purgePictrs(pool) {
     if (pic.action === 'purge') {
       try {
         const purgeUrl = `${pictrsUrl}/internal/purge?alias=${alias}`
-        await (await fetch(purgeUrl, {
-          method: 'POST',
-          headers: {
-            'X-Api-Token': pictrsServerApiToken
-          }
-        })).json();
+        if (!process.env.DRY_RUN) {
+          await (await fetch(purgeUrl, {
+            method: 'POST',
+            headers: {
+              'X-Api-Token': pictrsServerApiToken
+            }
+          })).json();
+        }
       } catch (e) {
         error = true;
         console.error(`Failed on ${purgeUrl}`)
       }
       purgeCount++;
     } else {
+      const aliasUrl = `${pictrsUrl}/internal/aliases?alias=${alias}`
       try {
-        const aliasUrl = `${pictrsUrl}/internal/aliases?alias=${alias}`
         const aliasRes = await (await fetch(aliasUrl, {
           method: 'GET',
           headers: {
@@ -207,7 +209,9 @@ async function purgePictrs(pool) {
           const time = fs.statSync(f).mtime.getTime();
           if (time < yesterday) {
             try {
-              fs.unlinkSync(f);
+              if (!process.env.DRY_RUN) {
+                fs.unlinkSync(f);
+              }
             } catch (e) {
               console.error(e);
             }
